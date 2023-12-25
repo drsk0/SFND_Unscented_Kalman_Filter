@@ -20,27 +20,41 @@ class UKF {
    * ProcessMeasurement
    * @param meas_package The latest measurement data of either radar or laser
    */
-  void ProcessMeasurement(MeasurementPackage meas_package);
+  void ProcessMeasurement(const MeasurementPackage &meas_package);
 
   /**
    * Prediction Predicts sigma points, the state, and the state covariance
    * matrix
    * @param delta_t Time between k and k+1 in s
    */
-  void Prediction(double delta_t);
+  void Prediction(const double delta_t);
 
   /**
    * Updates the state and the state covariance matrix using a laser measurement
    * @param meas_package The measurement at k+1
    */
-  void UpdateLidar(MeasurementPackage meas_package);
+  void UpdateLidar(const MeasurementPackage &meas_package);
 
   /**
    * Updates the state and the state covariance matrix using a radar measurement
    * @param meas_package The measurement at k+1
    */
-  void UpdateRadar(MeasurementPackage meas_package);
+  void UpdateRadar(const MeasurementPackage &meas_package);
 
+
+  /**
+  * Recompute augmented sigma points;
+  */
+  void AugmentedSigmaPoints();
+
+  /**
+  * Predict sigma points;
+  */
+  void SigmaPointPrediction(const double delta_t);
+
+  void PredictMeanAndCovariance();
+
+  void PredictRadarMeasurement(Eigen::VectorXd &z_pred, Eigen::MatrixXd &S);
 
   // initially set to false, set to true in first call of ProcessMeasurement
   bool is_initialized_;
@@ -60,8 +74,11 @@ class UKF {
   // predicted sigma points matrix
   Eigen::MatrixXd Xsig_pred_;
 
+  // augmented sigma points matrix
+  Eigen::MatrixXd Xsig_aug_;
+
   // time when the state is true, in us
-  long long time_us_;
+  long long time_;
 
   // Process noise standard deviation longitudinal acceleration in m/s^2
   double std_a_;
@@ -90,11 +107,18 @@ class UKF {
   // State dimension
   int n_x_;
 
+  int n_z_;
+
   // Augmented state dimension
   int n_aug_;
 
   // Sigma point spreading parameter
   double lambda_;
+
+  Eigen::MatrixXd Zsig_;
+  Eigen::MatrixXd H_;
+  Eigen::MatrixXd RL_;
+  Eigen::MatrixXd RR_;
 };
 
 #endif  // UKF_H
